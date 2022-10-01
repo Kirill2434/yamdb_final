@@ -8,29 +8,63 @@ _**REST API для сервиса YaMDb**_
 
 Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку.
 
-## Как запустить проект:
+## Как запустить проект: 
+Все описанное ниже относится к ОС Linux. 
+Клонируем репозиторий и и переходим в него: 
+```bash 
+git clone git@github.com:Kirill2434/yamdb_final.git
+cd yamdb_final 
+cd api_yamdb 
+``` 
+ 
+Создаем и активируем виртуальное окружение: 
+```bash 
+python3 -m venv venv 
+source /venv/Scripts/activate
+python -m pip install --upgrade pip 
+``` 
+ 
+Ставим зависимости из requirements.txt: 
+```bash 
+pip install -r requirements.txt 
+``` 
 
-Cоздать и активировать виртуальное окружение:
-```
-python3 -m venv venv
-```
-```
-source venv/bin/activate
-```
-Установить зависимости из файла requirements.txt:
-```
-python3 -m pip install --upgrade pip
-```
-```
-pip install -r requirements.txt
-```
-Выполнить миграции:
-```
-python3 manage.py migrate
-```
-Запустить проект:
-```
-python3 manage.py runserver
+Переходим в папку с файлом docker-compose.yaml: 
+```bash 
+cd infra 
+``` 
+ 
+Поднимаем контейнеры (infra_db_1, infra_web_1, infra_nginx_1): 
+```bash 
+docker-compose up -d --build 
+``` 
+
+Выполняем миграции: 
+```bash 
+docker-compose exec web python manage.py makemigrations reviews 
+``` 
+```bash 
+docker-compose exec web python manage.py migrate --run-syncdb
+``` 
+
+Создаем суперпользователя: 
+```bash 
+docker-compose exec web python manage.py createsuperuser 
+``` 
+
+Србираем статику: 
+```bash 
+docker-compose exec web python manage.py collectstatic --no-input 
+``` 
+
+Создаем дамп базы данных (нет в текущем репозитории): 
+```bash 
+docker-compose exec web python manage.py dumpdata > dumpPostrgeSQL.json 
+``` 
+
+Останавливаем контейнеры: 
+```bash 
+docker-compose down -v 
 ```
 
 _**К проекту по адресу http://IP_адрес/redoc/ подключена документация API YaMDb. В ней описаны возможные запросы к API и структура ожидаемых ответов.**_
